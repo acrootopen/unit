@@ -180,7 +180,7 @@ public class UnitController {
 		}
 	}
 	
-	// To find the status of a particular switch
+	// To set the status of a particular switch
 	@RequestMapping(path="/{switchId}/{state}", method=RequestMethod.POST)
 	ResponseEntity<SwitchResponseModel> setSwitchStatus(@PathVariable Boolean state,@PathVariable Long switchId)
 	{
@@ -209,4 +209,88 @@ public class UnitController {
 		}
 	}
 	
+	// To set a remote switch status
+	
+	@RequestMapping(path="/remote/{switchId}/{state}", method=RequestMethod.POST)
+	ResponseEntity<RemoteSwitchesResponseModel> setRemoteSwitchStatus(@PathVariable Boolean state,@PathVariable Long switchId)
+	{
+		
+		RemoteSwitchesEntity remoteSwitchesEntity=remoteSwitchesRepository.getOne(switchId);
+		if(remoteSwitchesEntity!=null)
+		{
+		remoteSwitchesEntity.setStatus(state);
+		remoteSwitchesRepository.save(remoteSwitchesEntity);
+		
+		RemoteSwitchesResponseModel remoteSwitchesResponseModel = new RemoteSwitchesResponseModel();
+		remoteSwitchesResponseModel.setSwitchUid(remoteSwitchesEntity.getSwitchUid());
+		remoteSwitchesResponseModel.setStatus(remoteSwitchesEntity.isStatus());
+		remoteSwitchesResponseModel.setSwitchId(remoteSwitchesEntity.getSwitchId());
+		
+		ResponseEntity<RemoteSwitchesResponseModel> responseEntity=new ResponseEntity<>(remoteSwitchesResponseModel,HttpStatus.CREATED);
+		
+		return responseEntity;
+		}
+		else
+		{
+			RemoteSwitchesResponseModel remoteSwitchesResponseModel=new RemoteSwitchesResponseModel();
+			remoteSwitchesResponseModel.setErrorMessage("Invalid switch Id");
+			ResponseEntity<RemoteSwitchesResponseModel> responseEntity=new ResponseEntity<>(remoteSwitchesResponseModel,HttpStatus.NOT_FOUND);
+			return responseEntity;
+		}
+	}
+
+// To get the remote switch status
+	
+	@RequestMapping(path="/remote/{switchId}", method=RequestMethod.GET)
+	ResponseEntity<RemoteSwitchesResponseModel> getRemoteSwitchStatus(@PathVariable Long switchId)
+	{
+		
+		RemoteSwitchesEntity remoteSwitchesEntity=remoteSwitchesRepository.getOne(switchId);
+		if(remoteSwitchesEntity!=null)
+		{
+					
+		RemoteSwitchesResponseModel remoteSwitchesResponseModel = new RemoteSwitchesResponseModel();
+		remoteSwitchesResponseModel.setSwitchUid(remoteSwitchesEntity.getSwitchUid());
+		remoteSwitchesResponseModel.setStatus(remoteSwitchesEntity.isStatus());
+		remoteSwitchesResponseModel.setSwitchId(remoteSwitchesEntity.getSwitchId());
+		
+		ResponseEntity<RemoteSwitchesResponseModel> responseEntity=new ResponseEntity<>(remoteSwitchesResponseModel,HttpStatus.FOUND);
+		
+		return responseEntity;
+		}
+		else
+		{
+			RemoteSwitchesResponseModel remoteSwitchesResponseModel=new RemoteSwitchesResponseModel();
+			remoteSwitchesResponseModel.setErrorMessage("Invalid switch Id");
+			ResponseEntity<RemoteSwitchesResponseModel> responseEntity=new ResponseEntity<>(remoteSwitchesResponseModel,HttpStatus.NOT_FOUND);
+			return responseEntity;
+		}
+	}
+	
+//To get the health of a remote slave
+	@RequestMapping(path="/remote/{slaveId}/health",method=RequestMethod.GET)
+	ResponseEntity<SlaveResponseModel> showRemoteHealth(@PathVariable Long slaveId)
+	{
+		SlaveEntity slaveEntity=slaveRepository.getOne(slaveId);
+		
+		if(slaveEntity!=null)
+		{
+			SlaveResponseModel slaveResponseModel=new SlaveResponseModel();
+			slaveResponseModel.setHealth(slaveEntity.isHealth());
+			slaveResponseModel.setSlaveId(slaveEntity.getSlaveId());
+			ResponseEntity<SlaveResponseModel> responseEntity=new ResponseEntity<>(slaveResponseModel,HttpStatus.OK);
+			return responseEntity;
+		}
+		else
+		{
+			SlaveResponseModel slaveResponseModel=new SlaveResponseModel();
+			slaveResponseModel.setErrorMessage("Invalid SlaveId");
+			ResponseEntity<SlaveResponseModel> responseEntity=new ResponseEntity<>(slaveResponseModel,HttpStatus.NOT_FOUND);
+			return responseEntity;
+
+		}
+	}
+	
 }
+
+
