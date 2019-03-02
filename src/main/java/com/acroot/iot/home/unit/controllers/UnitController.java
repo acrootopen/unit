@@ -40,7 +40,7 @@ public class UnitController {
 	
 	
 	@RequestMapping(path="/addSlave", method=RequestMethod.POST)
-	String addSlaves(@RequestBody SlaveModel slaveModel) 
+	private void addSlaves(@RequestBody SlaveModel slaveModel) 
 	{
 		SlaveEntity slaveEntity=new SlaveEntity();
 		slaveEntity.setSlaveUID(slaveModel.getSlaveUID());
@@ -48,36 +48,31 @@ public class UnitController {
 		slaveEntity.setSecretKey(slaveModel.getSecretKey());
 		slaveEntity.setHealth(slaveModel.isHealth());
 		slaveRepository.save(slaveEntity);
-		return "";
-		
 	}
 	
 	@RequestMapping(path="/addSwitches", method=RequestMethod.POST)
-	String addSwitches(@RequestBody SwitchModel switchModel)
+	private void addSwitches(@RequestBody SwitchModel switchModel)
 	{
 		SwitchEntity switchEntity=new SwitchEntity();;
 		switchEntity.setSwitchUid(switchModel.getSwitchUid());
 		switchEntity.setTag(switchModel.getTag());
 		switchEntity.setStatus(switchModel.isStatus());
-		switchRepository.save(switchEntity);
-				
-		return "";
-		
+		switchRepository.save(switchEntity);			
 	}
 	
 	@RequestMapping(path="/addRemoteSwitches", method=RequestMethod.POST)
-	String addRemoteSwitches(@RequestBody RemoteSwitchesModel remoteSwitchesModel)
+	private void addRemoteSwitches(@RequestBody RemoteSwitchesModel remoteSwitchesModel)
 	{
 		RemoteSwitchesEntity remoteSwitchesEntity=new RemoteSwitchesEntity();
 		remoteSwitchesEntity.setSwitchUid(remoteSwitchesModel.getSwitchUid());
 		remoteSwitchesEntity.setTag(remoteSwitchesModel.getTag());
 		remoteSwitchesEntity.setStatus(remoteSwitchesModel.isStatus());
-		remoteSwitchesRepository.save(remoteSwitchesEntity);
-		return "";
-		
+		remoteSwitchesRepository.save(remoteSwitchesEntity);		
 	}
+	
+	
 	// To get the status of switch
-	@RequestMapping(path="/{switchId}", method=RequestMethod.GET)
+	@RequestMapping(path="/switch/{switchId}", method=RequestMethod.GET)
 	ResponseEntity<SwitchResponseModel> showSwitchStatus(@PathVariable Long switchId)
 	{
 		
@@ -95,7 +90,6 @@ public class UnitController {
 			SwitchResponseModel switchResponseModel=new SwitchResponseModel();
 			switchResponseModel.setErrorMessage("Invalid SwitchId");
 			ResponseEntity<SwitchResponseModel> responseEntity=new ResponseEntity<>(switchResponseModel,HttpStatus.NOT_FOUND);
-			
 			return responseEntity;
 		}
 		
@@ -110,6 +104,7 @@ public class UnitController {
 		SlaveEntity slaveEntity=slaveRepository.getOne(slaveId);
 		if(slaveEntity!=null)
 		{
+			
 			RemoteSwitchesEntity remoteSwitchesEntity =remoteSwitchesRepository.getOne(slaveId);
 			if(remoteSwitchesEntity!=null)
 			{
@@ -118,11 +113,12 @@ public class UnitController {
 				remoteSwitchesResponseModel.setSwitchUid(remoteSwitchesEntity.getSwitchUid());
 				remoteSwitchesResponseModel.setStatus(remoteSwitchesEntity.isStatus());
 				remoteSwitchesResponseModel.setTag(remoteSwitchesEntity.getTag());
-				remoteSwitchesResponseModel.setErrorMessage("Its a rempte slave");
+				remoteSwitchesResponseModel.setErrorMessage("Its a remote slave");
 				ResponseEntity<RemoteSwitchesResponseModel> responseEntity=new ResponseEntity<>(remoteSwitchesResponseModel,HttpStatus.OK);
 				return responseEntity;
 			}
 			else
+	// if its not a remote slave, return all the switches in slave entity
 			{
 			List<SwitchEntity> switchEntity = switchRepository.findAll();
 			//List<SwitchEntity> switchEntities=new ArrayList<SwitchEntity>();
@@ -140,20 +136,8 @@ public class UnitController {
 			}	
 		}
 		return null;
-		
 	
-		
-		
 	}
-	
-	
-	/*
-	 * List<RemoteSwitchesEntity> showAllSwitchStatus(@PathVariable Long slaveId) {
-	 * SlaveEntity slaveEntity = slaveRepository.findById(slaveId).get(); return
-	 * slaveEntity.getRemoteSwitchesEntities();
-	 * 
-	 * }
-	 */
 	
 	
 	// To find the health of a particular slave
@@ -181,7 +165,7 @@ public class UnitController {
 	}
 	
 	// To set the status of a particular switch
-	@RequestMapping(path="/{switchId}/{state}", method=RequestMethod.POST)
+	@RequestMapping(path="/switch/{switchId}/{state}", method=RequestMethod.POST)
 	ResponseEntity<SwitchResponseModel> setSwitchStatus(@PathVariable Boolean state,@PathVariable Long switchId)
 	{
 		
@@ -211,7 +195,7 @@ public class UnitController {
 	
 	// To set a remote switch status
 	
-	@RequestMapping(path="/remote/{switchId}/{state}", method=RequestMethod.POST)
+	@RequestMapping(path="/remote/switch/{switchId}/{state}", method=RequestMethod.POST)
 	ResponseEntity<RemoteSwitchesResponseModel> setRemoteSwitchStatus(@PathVariable Boolean state,@PathVariable Long switchId)
 	{
 		
@@ -241,7 +225,7 @@ public class UnitController {
 
 // To get the remote switch status
 	
-	@RequestMapping(path="/remote/{switchId}", method=RequestMethod.GET)
+	@RequestMapping(path="/remote/switch/{switchId}", method=RequestMethod.GET)
 	ResponseEntity<RemoteSwitchesResponseModel> getRemoteSwitchStatus(@PathVariable Long switchId)
 	{
 		
